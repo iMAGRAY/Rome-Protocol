@@ -32,7 +32,7 @@ async function main() {
         console.log('📊 Automation Options:');
         console.log(`   Wallets: ${options.walletCount}`);
         console.log(`   Contracts per wallet: ${options.contractsPerWallet}`);
-        console.log(`   Target transactions: ${options.targetTransactions}`);
+        console.log(`   Random activity: ${options.startRandomActivity ? 'Yes' : 'No'}`);
         console.log(`   Submit forms: ${options.submitForms ? 'Yes' : 'No'}`);
         console.log('');
         // Execute automation
@@ -53,7 +53,7 @@ function parseArguments(args) {
     const options = {
         walletCount: 5,
         contractsPerWallet: 1,
-        targetTransactions: config_1.config.transactions.maxTransactions,
+        startRandomActivity: true,
         submitForms: true
     };
     for (let i = 0; i < args.length; i++) {
@@ -74,12 +74,8 @@ function parseArguments(args) {
                     i++;
                 }
                 break;
-            case '--transactions':
-            case '-t':
-                if (nextArg && !isNaN(Number(nextArg))) {
-                    options.targetTransactions = parseInt(nextArg);
-                    i++;
-                }
+            case '--no-activity':
+                options.startRandomActivity = false;
                 break;
             case '--no-forms':
                 options.submitForms = false;
@@ -102,15 +98,15 @@ Usage: npm run dev [options]
 Options:
   -w, --wallets <number>       Number of wallets to create (default: 5)
   -c, --contracts <number>     Contracts per wallet to deploy (default: 1)
-  -t, --transactions <number>  Target number of transactions (default: 10000)
+  --no-activity               Skip random blockchain activity
   --no-forms                   Skip Google Forms submission
   -h, --help                   Show this help message
 
 Examples:
-  npm run dev                                    # Run with default settings
-  npm run dev -w 10 -c 2 -t 5000               # 10 wallets, 2 contracts each, 5000 transactions
-  npm run dev --no-forms                        # Skip forms submission
-  npm run dev -w 3 -t 1000 --no-forms         # 3 wallets, 1000 transactions, no forms
+  npm run dev                                    # Run with default settings (random activity enabled)
+  npm run dev -w 10 -c 2                       # 10 wallets, 2 contracts each, with random activity
+  npm run dev --no-forms                        # Skip forms submission, keep random activity
+  npm run dev -w 3 --no-activity --no-forms    # 3 wallets, no random activity, no forms
 
 Environment Variables:
   See .env.example for configuration options
@@ -121,7 +117,7 @@ Features:
   ✨ Browser automation for Rome Protocol
   ✨ SOL to rSOL bridging
   ✨ Smart contract deployment
-  ✨ Mass transaction execution (10k+ transactions)
+  ✨ Intelligent random blockchain activity
   ✨ Google Forms automation
   ✨ Error handling and retry logic
   ✨ Progress saving and recovery
@@ -135,7 +131,7 @@ function displayStats(stats) {
     console.log(`🪙 Total rSOL Balance: ${stats.rSolBalance.toFixed(2)} rSOL`);
     console.log(`🌉 Bridges Completed: ${stats.bridgesCompleted}`);
     console.log(`📜 Contracts Deployed: ${stats.contractsDeployed}`);
-    console.log(`💸 Transactions Completed: ${stats.transactionsCompleted}`);
+    console.log(`🎲 Random Activities: ${stats.transactionsCompleted}`);
     if (stats.errors.length > 0) {
         console.log(`❌ Errors: ${stats.errors.length}`);
         console.log('\nError Details:');

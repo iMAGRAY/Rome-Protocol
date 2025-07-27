@@ -11,9 +11,12 @@ contract HelloWorld {
     address public owner;
     uint256 public deploymentBlock;
     uint256 public interactionCount;
+    mapping(address => uint256) public userInteractions;
+    string[] public messageHistory;
     
     event GreetingChanged(string newGreeting, address changedBy, uint256 timestamp);
     event ContractInteraction(address user, uint256 count, uint256 timestamp);
+    event MessageStored(string message, address sender, uint256 timestamp);
     
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
@@ -48,9 +51,44 @@ contract HelloWorld {
         
         greet = _greeting;
         interactionCount++;
+        userInteractions[msg.sender]++;
         
         emit GreetingChanged(_greeting, msg.sender, block.timestamp);
         emit ContractInteraction(msg.sender, interactionCount, block.timestamp);
+    }
+    
+    /**
+     * @dev Store a message in history
+     * @param _message Message to store
+     */
+    function storeMessage(string memory _message) public {
+        require(bytes(_message).length > 0, "Message cannot be empty");
+        require(bytes(_message).length <= 100, "Message too long");
+        
+        messageHistory.push(_message);
+        interactionCount++;
+        userInteractions[msg.sender]++;
+        
+        emit MessageStored(_message, msg.sender, block.timestamp);
+        emit ContractInteraction(msg.sender, interactionCount, block.timestamp);
+    }
+    
+    /**
+     * @dev Get message from history
+     * @param index Index of message
+     * @return Message at index
+     */
+    function getMessage(uint256 index) public view returns (string memory) {
+        require(index < messageHistory.length, "Index out of bounds");
+        return messageHistory[index];
+    }
+    
+    /**
+     * @dev Get total number of stored messages
+     * @return Number of messages
+     */
+    function getMessageCount() public view returns (uint256) {
+        return messageHistory.length;
     }
     
     /**
@@ -72,6 +110,7 @@ contract HelloWorld {
      */
     function ping() public {
         interactionCount++;
+        userInteractions[msg.sender]++;
         emit ContractInteraction(msg.sender, interactionCount, block.timestamp);
     }
     
@@ -86,6 +125,42 @@ contract HelloWorld {
             interactionCount++;
         }
         
+        userInteractions[msg.sender] += count;
+        emit ContractInteraction(msg.sender, interactionCount, block.timestamp);
+    }
+    
+    /**
+     * @dev Random number generator (for demo purposes)
+     * @return pseudo-random number
+     */
+    function getRandomNumber() public view returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(
+            block.timestamp,
+            block.prevrandao,
+            msg.sender,
+            interactionCount
+        ))) % 1000;
+    }
+    
+    /**
+     * @dev Toggle greeting between predefined messages
+     */
+    function toggleGreeting() public {
+        string[5] memory greetings = [
+            "Hello, World!",
+            "Hello Rome Protocol!",
+            "Greetings from blockchain!",
+            "Random activity in progress",
+            "Testing smart contracts"
+        ];
+        
+        uint256 randomIndex = getRandomNumber() % greetings.length;
+        greet = greetings[randomIndex];
+        
+        interactionCount++;
+        userInteractions[msg.sender]++;
+        
+        emit GreetingChanged(greet, msg.sender, block.timestamp);
         emit ContractInteraction(msg.sender, interactionCount, block.timestamp);
     }
     
@@ -140,10 +215,20 @@ contract HelloWorld {
     }
     
     /**
+     * @dev Get user interaction count
+     * @param user User address
+     * @return Number of interactions by user
+     */
+    function getUserInteractions(address user) public view returns (uint256) {
+        return userInteractions[user];
+    }
+    
+    /**
      * @dev Receive function for ETH deposits (not used but good practice)
      */
     receive() external payable {
         interactionCount++;
+        userInteractions[msg.sender]++;
         emit ContractInteraction(msg.sender, interactionCount, block.timestamp);
     }
     
@@ -152,6 +237,7 @@ contract HelloWorld {
      */
     fallback() external payable {
         interactionCount++;
+        userInteractions[msg.sender]++;
         emit ContractInteraction(msg.sender, interactionCount, block.timestamp);
     }
 }

@@ -176,37 +176,136 @@ class RomeAutomation {
             return [];
         }
     }
-    // Step 6: Execute mass transactions
-    async executeMassTransactions(targetCount = config_1.config.transactions.maxTransactions) {
+    // Step 6: Start continuous random activity
+    async startRandomActivity() {
         try {
-            logger_1.logger.info(`Starting mass transaction execution: ${targetCount} transactions...`);
+            logger_1.logger.info('Starting continuous random blockchain activity...');
             if (this.wallets.length < 2) {
-                throw new Error('Need at least 2 wallets for mass transactions');
+                throw new Error('Need at least 2 wallets for random activity');
             }
-            // Method 1: Random transactions between wallets
-            const randomTxResults = await this.transactionBot.sendRandomTransactions(this.wallets, Math.floor(targetCount * 0.7) // 70% random transactions
-            );
-            // Method 2: Circular transactions
-            const circularTxResults = await this.transactionBot.sendCircularTransactions(this.wallets, Math.floor(targetCount * 0.2 / this.wallets.length) // 20% circular
-            );
-            // Method 3: Contract interactions if contracts are deployed
-            let contractTxResults = [];
-            if (this.deployedContracts.length > 0) {
-                contractTxResults = await this.transactionBot.interactWithContracts(this.wallets, this.deployedContracts, Math.floor(targetCount * 0.1) // 10% contract interactions
-                );
-            }
-            const allResults = [...randomTxResults, ...circularTxResults, ...contractTxResults];
-            const successfulTx = allResults.filter(result => result.success).length;
-            this.stats.transactionsCompleted = successfulTx;
-            logger_1.logger.info(`Mass transactions completed: ${successfulTx}/${allResults.length} successful`);
-            return allResults;
+            // Start background activity that runs indefinitely
+            logger_1.logger.info('Random activity started in background');
+            // Don't await - let it run in background
+            this.runRandomActivity().catch(error => {
+                logger_1.logger.error('Random activity crashed:', error);
+            });
         }
         catch (error) {
-            const errorMsg = `Failed to execute mass transactions: ${error instanceof Error ? error.message : String(error)}`;
+            const errorMsg = `Failed to start random activity: ${error instanceof Error ? error.message : String(error)}`;
             this.stats.errors.push(errorMsg);
             logger_1.logger.error(errorMsg, error);
-            return [];
         }
+    }
+    async runRandomActivity() {
+        const activities = [
+            'randomTransfer',
+            'contractInteraction',
+            'contractDeployment',
+            'multiTransfer',
+            'contractCall',
+            'balanceCheck'
+        ];
+        while (true) {
+            try {
+                // Random delay between 30 seconds to 5 minutes
+                const delayMs = Math.random() * (5 * 60 * 1000 - 30 * 1000) + 30 * 1000;
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                // Pick random activity
+                const activity = activities[Math.floor(Math.random() * activities.length)];
+                const wallet = this.wallets[Math.floor(Math.random() * this.wallets.length)];
+                logger_1.logger.info(`Executing random activity: ${activity} with wallet ${wallet.evm.address}`);
+                switch (activity) {
+                    case 'randomTransfer':
+                        await this.executeRandomTransfer(wallet);
+                        break;
+                    case 'contractInteraction':
+                        await this.executeRandomContractInteraction(wallet);
+                        break;
+                    case 'contractDeployment':
+                        await this.executeRandomContractDeployment(wallet);
+                        break;
+                    case 'multiTransfer':
+                        await this.executeMultiTransfer(wallet);
+                        break;
+                    case 'contractCall':
+                        await this.executeRandomContractCall(wallet);
+                        break;
+                    case 'balanceCheck':
+                        await this.executeBalanceCheck(wallet);
+                        break;
+                }
+                this.stats.transactionsCompleted++;
+            }
+            catch (error) {
+                logger_1.logger.warn('Random activity error (continuing):', error);
+                this.stats.errors.push(`Random activity error: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
+    }
+    async executeRandomTransfer(fromWallet) {
+        const toWallet = this.wallets.find(w => w.evm.address !== fromWallet.evm.address);
+        if (!toWallet)
+            return;
+        const amount = (Math.random() * 0.01 + 0.001).toFixed(6); // 0.001-0.011 ETH
+        await this.transactionBot.sendTransaction(fromWallet, toWallet.evm.address, amount);
+        logger_1.logger.info(`Random transfer: ${amount} ETH from ${fromWallet.evm.address} to ${toWallet.evm.address}`);
+    }
+    async executeRandomContractInteraction(wallet) {
+        if (this.deployedContracts.length === 0)
+            return;
+        const contractAddress = this.deployedContracts[Math.floor(Math.random() * this.deployedContracts.length)];
+        const interactions = [
+            '0xa41368620000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d48656c6c6f2c20576f726c642100000000000000000000000000000000000000', // setGreeting("Hello, World!")
+            '0xa41368620000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000b48656c6c6f20526f6d652100000000000000000000000000000000000000000000', // setGreeting("Hello Rome!")
+            '0xe21f37ce', // ping()
+            '0x5c975abb0000000000000000000000000000000000000000000000000000000000000005', // batchPing(5)
+            '0x9061b923', // toggleGreeting()
+            '0x84c84b9100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000010526f6d652050726f746f636f6c20526f636b73210000000000000000000000', // storeMessage("Rome Protocol Rocks!")
+            '0xefbe1c1c' // getRandomNumber()
+        ];
+        const data = interactions[Math.floor(Math.random() * interactions.length)];
+        await this.transactionBot.sendTransaction(wallet, contractAddress, '0', data);
+        logger_1.logger.info(`Random contract interaction with ${contractAddress}`);
+    }
+    async executeRandomContractDeployment(wallet) {
+        const result = await this.contractDeployer.deployHelloWorld(wallet);
+        if (result.success) {
+            this.deployedContracts.push(result.address);
+            this.stats.contractsDeployed++;
+            logger_1.logger.info(`Random contract deployed at ${result.address}`);
+        }
+    }
+    async executeMultiTransfer(fromWallet) {
+        const recipients = this.wallets.filter(w => w.evm.address !== fromWallet.evm.address);
+        const numTransfers = Math.min(Math.floor(Math.random() * 3) + 1, recipients.length);
+        for (let i = 0; i < numTransfers; i++) {
+            const recipient = recipients[Math.floor(Math.random() * recipients.length)];
+            const amount = (Math.random() * 0.005 + 0.0001).toFixed(6);
+            await this.transactionBot.sendTransaction(fromWallet, recipient.evm.address, amount);
+            // Small delay between transfers
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        logger_1.logger.info(`Multi-transfer: ${numTransfers} transfers from ${fromWallet.evm.address}`);
+    }
+    async executeRandomContractCall(wallet) {
+        if (this.deployedContracts.length === 0)
+            return;
+        const contractAddress = this.deployedContracts[Math.floor(Math.random() * this.deployedContracts.length)];
+        // Random greeting message
+        const greetings = [
+            'Hello Rome Protocol!',
+            'Greetings from automation!',
+            'Testing smart contracts',
+            'Random activity ongoing',
+            'Blockchain interaction test'
+        ];
+        const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+        await this.contractDeployer.interactWithContract(contractAddress, wallet, greeting);
+        logger_1.logger.info(`Random contract call: set greeting to "${greeting}"`);
+    }
+    async executeBalanceCheck(wallet) {
+        const balances = await this.walletManager.checkBalances(wallet);
+        logger_1.logger.info(`Balance check for ${wallet.evm.address}: SOL ${balances.solBalance}, ETH ${balances.evmBalance}`);
     }
     // Step 7: Submit reward forms
     async submitRewardForms() {
@@ -228,7 +327,7 @@ class RomeAutomation {
     }
     // Execute full automation sequence
     async executeFullAutomation(options = {}) {
-        const { walletCount = 5, contractsPerWallet = 1, targetTransactions = config_1.config.transactions.maxTransactions, submitForms = true } = options;
+        const { walletCount = 5, contractsPerWallet = 1, startRandomActivity = true, submitForms = true } = options;
         try {
             logger_1.logger.info('Starting full Rome Protocol automation...');
             this.stats.startTime = Date.now();
@@ -249,9 +348,14 @@ class RomeAutomation {
                 await this.deployContracts(contractsPerWallet);
                 await this.saveProgress();
             }
-            // Step 6: Mass transactions
-            await this.executeMassTransactions(targetTransactions);
-            await this.saveProgress();
+            // Step 6: Start random activity (non-blocking)
+            if (startRandomActivity) {
+                await this.startRandomActivity();
+                logger_1.logger.info('Random activity running in background...');
+                // Let it run for a bit to show some activity
+                await new Promise(resolve => setTimeout(resolve, 30000)); // 30 seconds
+                await this.saveProgress();
+            }
             // Step 7: Submit forms (optional)
             if (submitForms) {
                 await this.submitRewardForms();

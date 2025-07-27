@@ -1,4 +1,4 @@
-import { WalletPair, AutomationStats, ContractDeployResult, TransactionResult } from '../types';
+import { WalletPair, AutomationStats, ContractDeployResult } from '../types';
 export declare class RomeAutomation {
     private walletManager;
     private solanaFaucet;
@@ -15,12 +15,19 @@ export declare class RomeAutomation {
     connectToRome(): Promise<boolean>;
     bridgeSolToRSol(): Promise<boolean>;
     deployContracts(contractsPerWallet?: number): Promise<ContractDeployResult[]>;
-    executeMassTransactions(targetCount?: number): Promise<TransactionResult[]>;
+    startRandomActivity(): Promise<void>;
+    private runRandomActivity;
+    private executeRandomTransfer;
+    private executeRandomContractInteraction;
+    private executeRandomContractDeployment;
+    private executeMultiTransfer;
+    private executeRandomContractCall;
+    private executeBalanceCheck;
     submitRewardForms(): Promise<boolean>;
     executeFullAutomation(options?: {
         walletCount?: number;
         contractsPerWallet?: number;
-        targetTransactions?: number;
+        startRandomActivity?: boolean;
         submitForms?: boolean;
     }): Promise<AutomationStats>;
     retryOperation<T>(operation: () => Promise<T>, maxRetries?: number, delayMs?: number): Promise<T>;
