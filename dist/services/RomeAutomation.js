@@ -44,6 +44,10 @@ class RomeAutomation {
             errors: [],
             startTime: Date.now()
         };
+        // Load existing Excel data if available
+        this.excelStats.loadExistingData().catch(error => {
+            logger_1.logger.warn('Не удалось загрузить существующие Excel данные:', error);
+        });
     }
     // Step 1: Create wallets
     async createWallets(count = 5) {
@@ -398,8 +402,16 @@ class RomeAutomation {
             this.stats.endTime = Date.now();
             await this.saveProgress();
             // Initialize and save Excel statistics
-            this.excelStats.initializeSummary(this.stats);
-            await this.excelStats.saveToExcel();
+            try {
+                this.excelStats.initializeSummary(this.stats);
+                await this.excelStats.saveToExcel();
+                const excelStats = this.excelStats.getStats();
+                logger_1.logger.info(`📊 Excel статистика создана: ${excelStats.filePath}`);
+                logger_1.logger.info(`📊 Данные: кошельков ${excelStats.wallets}, транзакций ${excelStats.transactions}, контрактов ${excelStats.contracts}`);
+            }
+            catch (error) {
+                logger_1.logger.error('Ошибка создания Excel статистики:', error);
+            }
             logger_1.logger.info('Full automation completed successfully!');
             this.logFinalStats();
             return this.stats;
@@ -411,8 +423,14 @@ class RomeAutomation {
             this.stats.endTime = Date.now();
             await this.saveProgress();
             // Save Excel even on error
-            this.excelStats.initializeSummary(this.stats);
-            await this.excelStats.saveToExcel();
+            try {
+                this.excelStats.initializeSummary(this.stats);
+                await this.excelStats.saveToExcel();
+                logger_1.logger.info('📊 Excel статистика сохранена даже при ошибке');
+            }
+            catch (excelError) {
+                logger_1.logger.error('Не удалось сохранить Excel при ошибке:', excelError);
+            }
             throw error;
         }
         finally {

@@ -44,7 +44,7 @@ export const config = {
     takeScreenshots: process.env.TAKE_SCREENSHOTS === 'true',
   },
   excel: {
-    saveStats: process.env.SAVE_EXCEL_STATS === 'true',
+    saveStats: process.env.SAVE_EXCEL_STATS !== 'false', // По умолчанию включено
     fileName: process.env.EXCEL_FILE_NAME || 'rome_protocol_stats.xlsx',
   },
   debug: {

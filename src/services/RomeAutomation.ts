@@ -42,6 +42,11 @@ export class RomeAutomation {
       errors: [],
       startTime: Date.now()
     };
+
+    // Load existing Excel data if available
+    this.excelStats.loadExistingData().catch(error => {
+      logger.warn('Не удалось загрузить существующие Excel данные:', error);
+    });
   }
 
   // Step 1: Create wallets
@@ -492,8 +497,15 @@ export class RomeAutomation {
       await this.saveProgress();
 
       // Initialize and save Excel statistics
-      this.excelStats.initializeSummary(this.stats);
-      await this.excelStats.saveToExcel();
+      try {
+        this.excelStats.initializeSummary(this.stats);
+        await this.excelStats.saveToExcel();
+        const excelStats = this.excelStats.getStats();
+        logger.info(`📊 Excel статистика создана: ${excelStats.filePath}`);
+        logger.info(`📊 Данные: кошельков ${excelStats.wallets}, транзакций ${excelStats.transactions}, контрактов ${excelStats.contracts}`);
+      } catch (error) {
+        logger.error('Ошибка создания Excel статистики:', error);
+      }
 
       logger.info('Full automation completed successfully!');
       this.logFinalStats();
@@ -508,8 +520,13 @@ export class RomeAutomation {
       await this.saveProgress();
       
       // Save Excel even on error
-      this.excelStats.initializeSummary(this.stats);
-      await this.excelStats.saveToExcel();
+      try {
+        this.excelStats.initializeSummary(this.stats);
+        await this.excelStats.saveToExcel();
+        logger.info('📊 Excel статистика сохранена даже при ошибке');
+      } catch (excelError) {
+        logger.error('Не удалось сохранить Excel при ошибке:', excelError);
+      }
       
       throw error;
     } finally {

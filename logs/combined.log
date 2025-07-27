@@ -27,3 +27,25 @@
 2025-07-27 16:50:18 [INFO]: SOL faucet completed: 2/2 successful
 2025-07-27 16:50:18 [INFO]: Progress saved to /workspace/progress/progress_1753635018213.json
 2025-07-27 16:50:18 [INFO]: Connecting to Rome Protocol website...
+2025-07-27 16:54:35 [INFO]: Connected to Solana cluster: 2.3.5
+2025-07-27 16:54:36 [INFO]: Connected to network: unknown (121215)
+2025-07-27 16:54:36 [INFO]: Health check completed
+2025-07-27 16:54:36 [INFO]: Starting full Rome Protocol automation...
+2025-07-27 16:54:36 [INFO]: Creating 1 wallet pairs...
+2025-07-27 16:54:36 [INFO]: Generated wallet pair: Solana 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE, EVM 0x521643CFBa6F2E5652D32DcD4c80120fF90c1E1a
+2025-07-27 16:54:36 [INFO]: Wallet saved to /workspace/wallets/wallet_1_1753635276710.json
+2025-07-27 16:54:36 [INFO]: Generated 1 wallets
+2025-07-27 16:54:36 [INFO]: Successfully created 1 wallet pairs
+2025-07-27 16:54:36 [INFO]: Wallet: Solana 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE | EVM 0x521643CFBa6F2E5652D32DcD4c80120fF90c1E1a
+2025-07-27 16:54:36 [INFO]: Progress saved to /workspace/progress/progress_1753635276840.json
+2025-07-27 16:54:36 [INFO]: Requesting SOL from faucet for all wallets...
+2025-07-27 16:54:37 [INFO]: Successfully requested 2 SOL via RPC for 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE
+2025-07-27 16:54:43 [INFO]: SOL received for 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE: 4 SOL
+2025-07-27 16:54:43 [INFO]: SOL faucet completed: 1/1 successful
+2025-07-27 16:54:43 [INFO]: Progress saved to /workspace/progress/progress_1753635283038.json
+2025-07-27 16:54:43 [INFO]: Connecting to Rome Protocol website...
+2025-07-27 16:55:59 [INFO]: 📊 Excel статистика сохранена: /workspace/rome_protocol_stats.xlsx
+2025-07-27 16:55:59 [INFO]: 📁 Создано листов: 4
+2025-07-27 16:55:59 [INFO]: 👛 Кошельков: 1
+2025-07-27 16:55:59 [INFO]: 💸 Транзакций: 1
+2025-07-27 16:55:59 [INFO]: 📜 Контрактов: 0
