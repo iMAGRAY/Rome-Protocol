@@ -6,6 +6,7 @@ export declare class RomeAutomation {
     private contractDeployer;
     private transactionBot;
     private googleFormsService;
+    private excelStats;
     private stats;
     private wallets;
     private deployedContracts;

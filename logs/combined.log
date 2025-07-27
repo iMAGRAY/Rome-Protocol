@@ -3,3 +3,27 @@
 2025-07-27 16:17:40 [INFO]: Connected to network: unknown (121215)
 2025-07-27 16:37:25 [INFO]: Connected to Solana cluster: 2.3.5
 2025-07-27 16:37:25 [INFO]: Connected to network: unknown (121215)
+2025-07-27 16:47:20 [INFO]: Connected to Solana cluster: 2.3.5
+2025-07-27 16:47:21 [INFO]: Connected to network: unknown (121215)
+2025-07-27 16:50:04 [INFO]: Connected to Solana cluster: 2.3.5
+2025-07-27 16:50:05 [INFO]: Connected to network: unknown (121215)
+2025-07-27 16:50:05 [INFO]: Health check completed
+2025-07-27 16:50:05 [INFO]: Starting full Rome Protocol automation...
+2025-07-27 16:50:05 [INFO]: Creating 2 wallet pairs...
+2025-07-27 16:50:05 [INFO]: Generated wallet pair: Solana 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE, EVM 0x521643CFBa6F2E5652D32DcD4c80120fF90c1E1a
+2025-07-27 16:50:05 [INFO]: Wallet saved to /workspace/wallets/wallet_1_1753635005541.json
+2025-07-27 16:50:05 [INFO]: Generated wallet pair: Solana G5vteGDdXXJMRy6xkZ5HCq9n96NHq3BgzyWtsA1T4pBv, EVM 0x0EFEf37986C3D69E1434b52eD5E5E40EB72B49Af
+2025-07-27 16:50:05 [INFO]: Wallet saved to /workspace/wallets/wallet_2_1753635005675.json
+2025-07-27 16:50:05 [INFO]: Generated 2 wallets
+2025-07-27 16:50:05 [INFO]: Successfully created 2 wallet pairs
+2025-07-27 16:50:05 [INFO]: Wallet: Solana 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE | EVM 0x521643CFBa6F2E5652D32DcD4c80120fF90c1E1a
+2025-07-27 16:50:05 [INFO]: Wallet: Solana G5vteGDdXXJMRy6xkZ5HCq9n96NHq3BgzyWtsA1T4pBv | EVM 0x0EFEf37986C3D69E1434b52eD5E5E40EB72B49Af
+2025-07-27 16:50:05 [INFO]: Progress saved to /workspace/progress/progress_1753635005799.json
+2025-07-27 16:50:05 [INFO]: Requesting SOL from faucet for all wallets...
+2025-07-27 16:50:06 [INFO]: Successfully requested 2 SOL via RPC for 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE
+2025-07-27 16:50:12 [INFO]: Successfully requested 2 SOL via RPC for G5vteGDdXXJMRy6xkZ5HCq9n96NHq3BgzyWtsA1T4pBv
+2025-07-27 16:50:18 [INFO]: SOL received for 7nJVjzQsDhjtwoNBF9qMnMaV1H6EsaW9wZdf1o9ufVRE: 2 SOL
+2025-07-27 16:50:18 [INFO]: SOL received for G5vteGDdXXJMRy6xkZ5HCq9n96NHq3BgzyWtsA1T4pBv: 2 SOL
+2025-07-27 16:50:18 [INFO]: SOL faucet completed: 2/2 successful
+2025-07-27 16:50:18 [INFO]: Progress saved to /workspace/progress/progress_1753635018213.json
+2025-07-27 16:50:18 [INFO]: Connecting to Rome Protocol website...

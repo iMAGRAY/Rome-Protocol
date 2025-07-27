@@ -60,10 +60,13 @@ class WalletManager {
             logger_1.logger.info('Created wallets directory');
         }
     }
-    async generateWalletPair() {
+    async generateWalletPair(index) {
         try {
-            // Generate mnemonic
-            const mnemonic = bip39.generateMnemonic();
+            // Use seed from config or generate new mnemonic
+            const baseSeed = config_1.config.wallet.seed;
+            const mnemonic = index !== undefined
+                ? bip39.entropyToMnemonic(ethers_1.ethers.keccak256(ethers_1.ethers.toUtf8Bytes(baseSeed + index)).slice(2, 34))
+                : bip39.generateMnemonic();
             const seed = await bip39.mnemonicToSeed(mnemonic);
             // Generate Solana keypair
             const solanaDerivationPath = "m/44'/501'/0'/0'";
@@ -202,7 +205,8 @@ class WalletManager {
         const wallets = [];
         for (let i = 0; i < count; i++) {
             try {
-                const wallet = await this.generateWalletPair();
+                // Use deterministic generation based on index
+                const wallet = await this.generateWalletPair(i);
                 this.saveWallet(wallet, `wallet_${i + 1}_${Date.now()}.json`);
                 wallets.push(wallet);
                 // Small delay to avoid overwhelming the system

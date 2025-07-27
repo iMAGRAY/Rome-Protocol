@@ -51,8 +51,8 @@ async function main() {
 }
 function parseArguments(args) {
     const options = {
-        walletCount: 5,
-        contractsPerWallet: 1,
+        walletCount: config_1.config.wallet.defaultCount,
+        contractsPerWallet: config_1.config.wallet.defaultContracts,
         startRandomActivity: true,
         submitForms: true
     };
@@ -147,6 +147,12 @@ function displayStats(stats) {
     console.log('   👛 wallets/ - Encrypted wallet files');
     console.log('   📊 progress/ - Progress snapshots');
     console.log('   📸 screenshots/ - Browser screenshots');
+    console.log(`   📊 ${config_1.config.excel.fileName} - Excel статистика (полная)`);
+    console.log('');
+    console.log('🔧 Настройки из .env файла:');
+    console.log(`   Seed: ${config_1.config.wallet.seed.substring(0, 30)}...`);
+    console.log(`   Задержка активности: ${config_1.config.activity.minDelayMs / 1000}-${config_1.config.activity.maxDelayMs / 1000} сек`);
+    console.log(`   Сумма переводов: ${config_1.config.activity.minAmount}-${config_1.config.activity.maxAmount} ETH`);
 }
 // Handle process signals
 process.on('SIGINT', () => {

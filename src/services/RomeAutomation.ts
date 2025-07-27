@@ -4,6 +4,7 @@ import { BrowserAutomation } from './BrowserAutomation';
 import { ContractDeployer } from './ContractDeployer';
 import { TransactionBot } from './TransactionBot';
 import { GoogleFormsService } from './GoogleFormsService';
+import { ExcelStats } from './ExcelStats';
 import { WalletPair, AutomationStats, ContractDeployResult, TransactionResult } from '../types';
 import { config } from '../config';
 import { logger } from '../utils/logger';
@@ -17,6 +18,7 @@ export class RomeAutomation {
   private contractDeployer: ContractDeployer;
   private transactionBot: TransactionBot;
   private googleFormsService: GoogleFormsService;
+  private excelStats: ExcelStats;
   private stats: AutomationStats;
   private wallets: WalletPair[] = [];
   private deployedContracts: string[] = [];
@@ -28,6 +30,7 @@ export class RomeAutomation {
     this.contractDeployer = new ContractDeployer();
     this.transactionBot = new TransactionBot();
     this.googleFormsService = new GoogleFormsService();
+    this.excelStats = new ExcelStats();
     
     this.stats = {
       walletsCreated: 0,
@@ -52,9 +55,11 @@ export class RomeAutomation {
       
       logger.info(`Successfully created ${wallets.length} wallet pairs`);
       
-      // Log wallet addresses for reference
-      for (const wallet of wallets) {
+      // Log wallet addresses for reference and add to Excel
+      for (let i = 0; i < wallets.length; i++) {
+        const wallet = wallets[i];
         logger.info(`Wallet: Solana ${wallet.solana.publicKey} | EVM ${wallet.evm.address}`);
+        this.excelStats.addWallet(wallet, i);
       }
       
       return wallets;
@@ -81,16 +86,19 @@ export class RomeAutomation {
       let successCount = 0;
       let totalBalance = 0;
 
-      for (const [publicKey, success] of results) {
-        if (success) {
-          successCount++;
-          const balance = await this.solanaFaucet.getBalance(publicKey);
-          totalBalance += balance;
-          logger.info(`SOL received for ${publicKey}: ${balance} SOL`);
-        } else {
-          logger.warn(`Failed to get SOL for ${publicKey}`);
+              for (const [publicKey, success] of results) {
+          if (success) {
+            successCount++;
+            const balance = await this.solanaFaucet.getBalance(publicKey);
+            totalBalance += balance;
+            logger.info(`SOL received for ${publicKey}: ${balance} SOL`);
+            
+            // Update balance in Excel
+            this.excelStats.updateWalletBalance(publicKey, balance, '0');
+          } else {
+            logger.warn(`Failed to get SOL for ${publicKey}`);
+          }
         }
-      }
 
       this.stats.solanaBalance = totalBalance;
       logger.info(`SOL faucet completed: ${successCount}/${this.wallets.length} successful`);
@@ -174,6 +182,9 @@ export class RomeAutomation {
               this.deployedContracts.push(result.address);
               this.stats.contractsDeployed++;
               logger.info(`Contract deployed at ${result.address} by ${wallet.evm.address}`);
+              
+              // Add contract to Excel
+              this.excelStats.addContract(result, wallet.evm.address);
             }
             
             // Delay between deployments
@@ -227,10 +238,10 @@ export class RomeAutomation {
       'balanceCheck'
     ];
 
-    while (true) {
-      try {
-        // Random delay between 30 seconds to 5 minutes
-        const delayMs = Math.random() * (5 * 60 * 1000 - 30 * 1000) + 30 * 1000;
+          while (true) {
+        try {
+          // Random delay from config
+          const delayMs = Math.random() * (config.activity.maxDelayMs - config.activity.minDelayMs) + config.activity.minDelayMs;
         await new Promise(resolve => setTimeout(resolve, delayMs));
 
         // Pick random activity
@@ -273,13 +284,16 @@ export class RomeAutomation {
     const toWallet = this.wallets.find(w => w.evm.address !== fromWallet.evm.address);
     if (!toWallet) return;
 
-    const amount = (Math.random() * 0.01 + 0.001).toFixed(6); // 0.001-0.011 ETH
+    const amount = (Math.random() * (config.activity.maxAmount - config.activity.minAmount) + config.activity.minAmount).toFixed(6);
     
-    await this.transactionBot.sendTransaction(
+    const result = await this.transactionBot.sendTransaction(
       fromWallet,
       toWallet.evm.address,
       amount
     );
+    
+    // Add transaction to Excel
+    this.excelStats.addTransaction(result, fromWallet.evm.address, toWallet.evm.address, amount, 'Случайный перевод');
     
     logger.info(`Random transfer: ${amount} ETH from ${fromWallet.evm.address} to ${toWallet.evm.address}`);
   }
@@ -300,12 +314,16 @@ export class RomeAutomation {
     
     const data = interactions[Math.floor(Math.random() * interactions.length)];
     
-    await this.transactionBot.sendTransaction(
+    const result = await this.transactionBot.sendTransaction(
       wallet,
       contractAddress,
       '0',
       data
     );
+    
+    // Add contract interaction to Excel
+    this.excelStats.addTransaction(result, wallet.evm.address, contractAddress, '0', 'Взаимодействие с контрактом');
+    this.excelStats.addContractInteraction(contractAddress);
     
     logger.info(`Random contract interaction with ${contractAddress}`);
   }
@@ -317,6 +335,9 @@ export class RomeAutomation {
       this.deployedContracts.push(result.address);
       this.stats.contractsDeployed++;
       logger.info(`Random contract deployed at ${result.address}`);
+      
+      // Add contract to Excel
+      this.excelStats.addContract(result, wallet.evm.address);
     }
   }
 
@@ -328,11 +349,14 @@ export class RomeAutomation {
       const recipient = recipients[Math.floor(Math.random() * recipients.length)];
       const amount = (Math.random() * 0.005 + 0.0001).toFixed(6);
       
-      await this.transactionBot.sendTransaction(
+      const result = await this.transactionBot.sendTransaction(
         fromWallet,
         recipient.evm.address,
         amount
       );
+      
+      // Add transaction to Excel
+      this.excelStats.addTransaction(result, fromWallet.evm.address, recipient.evm.address, amount, 'Мульти-перевод');
       
       // Small delay between transfers
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -356,13 +380,34 @@ export class RomeAutomation {
     ];
     
     const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-    await this.contractDeployer.interactWithContract(contractAddress, wallet, greeting);
+    const success = await this.contractDeployer.interactWithContract(contractAddress, wallet, greeting);
+    
+    // Add contract call to Excel (as a transaction-like entry)
+    const dummyResult = {
+      hash: 'contract-call-' + Date.now(),
+      success: success,
+      timestamp: Date.now()
+    };
+    this.excelStats.addTransaction(dummyResult as any, wallet.evm.address, contractAddress, '0', 'Вызов контракта');
+    this.excelStats.addContractInteraction(contractAddress);
     
     logger.info(`Random contract call: set greeting to "${greeting}"`);
   }
 
   private async executeBalanceCheck(wallet: WalletPair): Promise<void> {
     const balances = await this.walletManager.checkBalances(wallet);
+    
+    // Update balances in Excel
+    this.excelStats.updateWalletBalance(wallet.evm.address, balances.solBalance, balances.evmBalance);
+    
+    // Add balance check activity to Excel
+    const dummyResult = {
+      hash: 'balance-check-' + Date.now(),
+      success: true,
+      timestamp: Date.now()
+    };
+    this.excelStats.addTransaction(dummyResult as any, wallet.evm.address, wallet.evm.address, '0', 'Проверка баланса');
+    
     logger.info(`Balance check for ${wallet.evm.address}: SOL ${balances.solBalance}, ETH ${balances.evmBalance}`);
   }
 
@@ -446,6 +491,10 @@ export class RomeAutomation {
       this.stats.endTime = Date.now();
       await this.saveProgress();
 
+      // Initialize and save Excel statistics
+      this.excelStats.initializeSummary(this.stats);
+      await this.excelStats.saveToExcel();
+
       logger.info('Full automation completed successfully!');
       this.logFinalStats();
 
@@ -457,6 +506,10 @@ export class RomeAutomation {
       
       this.stats.endTime = Date.now();
       await this.saveProgress();
+      
+      // Save Excel even on error
+      this.excelStats.initializeSummary(this.stats);
+      await this.excelStats.saveToExcel();
       
       throw error;
     } finally {

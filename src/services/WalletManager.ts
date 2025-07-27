@@ -26,10 +26,13 @@ export class WalletManager {
     }
   }
 
-  public async generateWalletPair(): Promise<WalletPair> {
+  public async generateWalletPair(index?: number): Promise<WalletPair> {
     try {
-      // Generate mnemonic
-      const mnemonic = bip39.generateMnemonic();
+      // Use seed from config or generate new mnemonic
+      const baseSeed = config.wallet.seed;
+      const mnemonic = index !== undefined 
+        ? bip39.entropyToMnemonic(ethers.keccak256(ethers.toUtf8Bytes(baseSeed + index)).slice(2, 34))
+        : bip39.generateMnemonic();
       const seed = await bip39.mnemonicToSeed(mnemonic);
 
       // Generate Solana keypair
@@ -187,7 +190,8 @@ export class WalletManager {
     
     for (let i = 0; i < count; i++) {
       try {
-        const wallet = await this.generateWalletPair();
+        // Use deterministic generation based on index
+        const wallet = await this.generateWalletPair(i);
         this.saveWallet(wallet, `wallet_${i + 1}_${Date.now()}.json`);
         wallets.push(wallet);
         

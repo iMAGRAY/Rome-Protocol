@@ -4,7 +4,7 @@ export declare class WalletManager {
     private encryptionKey;
     constructor();
     private ensureWalletsDirectory;
-    generateWalletPair(): Promise<WalletPair>;
+    generateWalletPair(index?: number): Promise<WalletPair>;
     encryptWallet(walletPair: WalletPair): EncryptedWallet;
     decryptWallet(encryptedWallet: EncryptedWallet): WalletPair;
     saveWallet(walletPair: WalletPair, filename?: string): string;
