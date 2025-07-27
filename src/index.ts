@@ -25,12 +25,19 @@ async function main() {
     const healthStatus = await automation.healthCheck();
     
     for (const [check, status] of Object.entries(healthStatus)) {
-      console.log(`${status ? '✅' : '❌'} ${check}: ${status ? 'OK' : 'FAILED'}`);
+      if (check === 'browserInstalled') {
+        console.log(`${status ? '✅' : '⚠️'} ${check}: ${status ? 'OK' : 'WILL AUTO-INSTALL'}`);
+      } else {
+        console.log(`${status ? '✅' : '❌'} ${check}: ${status ? 'OK' : 'FAILED'}`);
+      }
     }
 
-    const allHealthy = Object.values(healthStatus).every(Boolean);
-    if (!allHealthy) {
-      console.warn('⚠️  Some health checks failed, but continuing...');
+    // Don't fail on browser installation - it will auto-install
+    const criticalChecks = Object.entries(healthStatus).filter(([check]) => check !== 'browserInstalled');
+    const allCriticalHealthy = criticalChecks.every(([, status]) => status);
+    
+    if (!allCriticalHealthy) {
+      console.warn('⚠️  Some critical health checks failed, but continuing...');
     }
 
     // Parse command line arguments
@@ -67,8 +74,8 @@ function parseArguments(args: string[]): {
   submitForms: boolean;
 } {
   const options = {
-    walletCount: config.wallet.defaultCount,
-    contractsPerWallet: config.wallet.defaultContracts,
+    walletCount: config.wallet.defaultCount, // Теперь из .env
+    contractsPerWallet: config.wallet.defaultContracts, // Теперь из .env
     startRandomActivity: true,
     submitForms: true
   };
@@ -120,17 +127,22 @@ Rome Protocol Automation Bot
 Usage: npm run dev [options]
 
 Options:
-  -w, --wallets <number>       Number of wallets to create (default: 5)
-  -c, --contracts <number>     Contracts per wallet to deploy (default: 1)
+  -w, --wallets <number>       Number of wallets to create (default: from .env DEFAULT_WALLET_COUNT=${config.wallet.defaultCount})
+  -c, --contracts <number>     Contracts per wallet to deploy (default: from .env DEFAULT_CONTRACTS_PER_WALLET=${config.wallet.defaultContracts})
   --no-activity               Skip random blockchain activity
   --no-forms                   Skip Google Forms submission
   -h, --help                   Show this help message
 
 Examples:
-  npm run dev                                    # Run with default settings (random activity enabled)
-  npm run dev -w 10 -c 2                       # 10 wallets, 2 contracts each, with random activity
-  npm run dev --no-forms                        # Skip forms submission, keep random activity
+  npm run dev                                    # Run with .env defaults (wallets=${config.wallet.defaultCount}, contracts=${config.wallet.defaultContracts})
+  npm run dev -w 10 -c 2                       # Override .env: 10 wallets, 2 contracts each
+  npm run dev --no-forms                        # Use .env defaults, skip forms submission
   npm run dev -w 3 --no-activity --no-forms    # 3 wallets, no random activity, no forms
+
+Configuration:
+  Edit .env file to change default values:
+  DEFAULT_WALLET_COUNT=5       # Default number of wallets
+  DEFAULT_CONTRACTS_PER_WALLET=1  # Default contracts per wallet
 
 Environment Variables:
   See .env.example for configuration options

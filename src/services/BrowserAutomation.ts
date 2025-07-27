@@ -25,6 +25,19 @@ export class BrowserAutomation {
 
   public async initializeBrowser(): Promise<void> {
     try {
+      // Check if browsers are installed first
+      const browserCheck = await this.checkBrowserInstallation();
+      if (!browserCheck) {
+        logger.warn('Playwright browsers not found. Attempting to install...');
+        const installed = await this.installBrowsers();
+        if (!installed) {
+          const error = new Error('Failed to install Playwright browsers. Please run manually: npx playwright install');
+          logger.error(error.message);
+          throw error;
+        }
+        logger.info('✅ Playwright browsers installed successfully');
+      }
+
       // Launch browser with extensions
       this.context = await chromium.launchPersistentContext(
         path.join(process.cwd(), 'browser-data'),
@@ -420,6 +433,74 @@ export class BrowserAutomation {
       }
     } catch (error) {
       logger.warn('Failed to handle wallet popup', error);
+    }
+  }
+
+  private async checkBrowserInstallation(): Promise<boolean> {
+    try {
+      // Try to get browser path
+      const browser = await chromium.launch({ headless: true });
+      await browser.close();
+      return true;
+    } catch (error: any) {
+      if (error.message.includes("Executable doesn't exist") || 
+          error.message.includes("Playwright") || 
+          error.message.includes("browser")) {
+        return false;
+      }
+      // Other errors might not be browser installation related
+      logger.warn('Browser check warning:', error.message);
+      return true;
+    }
+  }
+
+  private async installBrowsers(): Promise<boolean> {
+    try {
+      const { spawn } = require('child_process');
+      
+      logger.info('📥 Downloading Playwright browsers...');
+      
+      return new Promise((resolve) => {
+        const process = spawn('npx', ['playwright', 'install', 'chromium'], {
+          stdio: 'pipe',
+          shell: true
+        });
+
+        let output = '';
+        
+        process.stdout.on('data', (data: Buffer) => {
+          output += data.toString();
+          // Log progress
+          const lines = data.toString().split('\n');
+          lines.forEach(line => {
+            if (line.trim()) {
+              logger.info(`📥 ${line.trim()}`);
+            }
+          });
+        });
+
+        process.stderr.on('data', (data: Buffer) => {
+          logger.warn(`Install warning: ${data.toString()}`);
+        });
+
+        process.on('close', (code: number) => {
+          if (code === 0) {
+            logger.info('✅ Browser installation completed');
+            resolve(true);
+          } else {
+            logger.error(`❌ Browser installation failed with code ${code}`);
+            resolve(false);
+          }
+        });
+
+        process.on('error', (error: any) => {
+          logger.error('❌ Failed to start browser installation:', error);
+          resolve(false);
+        });
+      });
+    } catch (error) {
+      logger.error('❌ Browser installation error:', error);
+      return false;
     }
   }
 }

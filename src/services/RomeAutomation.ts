@@ -648,6 +648,7 @@ export class RomeAutomation {
     const checks = {
       solanaConnection: false,
       romeConnection: false,
+      browserInstalled: false,
       walletManager: false,
       configValid: false
     };
@@ -658,6 +659,9 @@ export class RomeAutomation {
       
       // Check Rome connection
       checks.romeConnection = await this.contractDeployer.validateConnection();
+      
+      // Check browser installation
+      checks.browserInstalled = await this.checkBrowsers();
       
       // Check wallet manager
       checks.walletManager = true; // Wallet manager is always available
@@ -671,5 +675,20 @@ export class RomeAutomation {
     }
 
     return checks;
+  }
+
+  private async checkBrowsers(): Promise<boolean> {
+    try {
+      const { chromium } = require('playwright');
+      const browser = await chromium.launch({ headless: true });
+      await browser.close();
+      return true;
+    } catch (error: any) {
+      if (error.message.includes("Executable doesn't exist")) {
+        logger.warn('Playwright browsers not installed - will auto-install when needed');
+        return false;
+      }
+      return true;
+    }
   }
 }
