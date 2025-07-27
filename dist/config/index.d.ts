@@ -11,6 +11,8 @@ export declare const config: {
     solana: {
         rpcUrl: string;
         faucetUrl: string;
+        faucetDelayMs: number;
+        maxRetries: number;
     };
     rome: RomeConfig;
     transactions: {

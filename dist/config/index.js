@@ -19,6 +19,8 @@ exports.config = {
     solana: {
         rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
         faucetUrl: process.env.SOLANA_FAUCET_URL || 'https://faucet.solana.com/api/v1/airdrop',
+        faucetDelayMs: parseInt(process.env.SOLANA_FAUCET_DELAY_MS || '5000'),
+        maxRetries: parseInt(process.env.SOLANA_FAUCET_MAX_RETRIES || '3'),
     },
     rome: {
         depositUrl: process.env.ROME_DEPOSIT_URL || 'https://deposit.testnet.romeprotocol.xyz',

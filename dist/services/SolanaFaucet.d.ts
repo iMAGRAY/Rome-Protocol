@@ -11,5 +11,7 @@ export declare class SolanaFaucet {
     canRequestAirdrop(publicKey: string): boolean;
     getTimeUntilNextRequest(publicKey: string): number;
     validateConnection(): Promise<boolean>;
+    private tryWebFaucetWithRetry;
+    private tryAlternativeFaucets;
 }
 //# sourceMappingURL=SolanaFaucet.d.ts.map
