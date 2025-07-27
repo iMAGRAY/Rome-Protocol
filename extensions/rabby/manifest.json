@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Rabby Development",
+  "version": "1.0.0",
+  "description": "Rabby wallet development placeholder",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "caelian": {
+    "chainId": "0xDEAD",
+    "chainName": "Caelian Testnet",
+    "nativeCurrency": {
+      "name": "ETH",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "rpcUrls": [
+      "https://caelian.testnet.romeprotocol.xyz/"
+    ],
+    "blockExplorerUrls": [
+      "https://caelian-explorer.testnet.romeprotocol.xyz/"
+    ]
+  },
+  "martis": {
+    "chainId": "0xDEAE",
+    "chainName": "Martis Testnet",
+    "nativeCurrency": {
+      "name": "ETH",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "rpcUrls": [
+      "https://martis.testnet.romeprotocol.xyz/"
+    ],
+    "blockExplorerUrls": [
+      "https://martis-explorer.testnet.romeprotocol.xyz/"
+    ]
+  }
+}
